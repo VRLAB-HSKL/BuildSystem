@@ -1,0 +1,12 @@
+[submodule "BuildSystemUnity"]
+	path = BuildSystemUnity
+	url = https://github.com/VRLAB-HSKL/BuildSystemUnity.git
+	branch = master
+[submodule "BuildSystemReactSpring"]
+	path = BuildSystemReactSpring
+	url = https://github.com/VRLAB-HSKL/BuildSystemReactSpring.git
+	branch = master
+[submodule "BuildSystemSimpleTestComponents"]
+	path = BuildSystemSimpleTestComponents
+	url = https://github.com/VRLAB-HSKL/BuildSystemSimpleTestComponents.git
+	branch = master
