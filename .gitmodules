@@ -10,3 +10,7 @@
 	path = BuildSystemSimpleTestComponents
 	url = https://github.com/VRLAB-HSKL/BuildSystemSimpleTestComponents.git
 	branch = develop
+[submodule "BuildSystemOAuth2Server"]
+	path = BuildSystemOAuth2Server
+	url = https://github.com/VRLAB-HSKL/BuildSystemOAuth2Server.git
+	branch = develop
