@@ -1,6 +1,9 @@
+<<<<<<< HEAD
 # gitignore for Unity projects
 # Wir ignorieren in Build-System nicht wie üblich die Packages wie MVR oder VIU,
 # um die Tests des Build-Systems zu erleichtern!
+
+.gitmodules
 
 # Vi and VIM Backup Files
 *~
@@ -25,10 +28,6 @@
 **/*.gch
 **/*.pch
 
-# Compiled Dynamic libraries
-**/*.so
-**/*.dylib
-**/*.dll
 
 # Fortran module files
 **/*.mod
@@ -39,11 +38,6 @@
 **/*.la
 **/*.a
 **/*.lib
-
-# Executables and Builds
-**/*.exe
-**/*.apk
-**/*.unitypackage
 
 **/[Ll]ibrary/
 **/[Tt]emp/
