@@ -38,11 +38,6 @@
 **/*.a
 **/*.lib
 
-# Executables and Builds
-**/*.exe
-**/*.apk
-**/*.unitypackage
-
 **/[Ll]ibrary/
 **/[Tt]emp/
 **/[Oo]bj/
