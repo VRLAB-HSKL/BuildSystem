@@ -1,6 +1,8 @@
 # Wir ignorieren in Build-System nicht wie üblich die Packages wie MVR oder VIU,
 # um die Tests des Build-Systems zu erleichtern!
 
+.gitmodules
+
 # Vi and VIM Backup Files
 *~
 *.swp
