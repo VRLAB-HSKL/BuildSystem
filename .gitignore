@@ -1,4 +1,3 @@
-# gitignore for Unity projects
 # Wir ignorieren in Build-System nicht wie üblich die Packages wie MVR oder VIU,
 # um die Tests des Build-Systems zu erleichtern!
 
@@ -28,7 +27,6 @@
 # Compiled Dynamic libraries
 **/*.so
 **/*.dylib
-**/*.dll
 
 # Fortran module files
 **/*.mod
