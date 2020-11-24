@@ -1,4 +1,4 @@
-﻿//========= Copyright 2016-2019, HTC Corporation. All rights reserved. ===========
+﻿//========= Copyright 2016-2020, HTC Corporation. All rights reserved. ===========
 
 using HTC.UnityPlugin.Utility;
 using HTC.UnityPlugin.Vive;
@@ -20,6 +20,7 @@ namespace HTC.UnityPlugin.VRModuleManagement
 #else
             false;
 #endif
+
         public static readonly bool isWaveVRSupported =
 #if VIU_WAVEVR_SUPPORT
             true;
@@ -30,7 +31,9 @@ namespace HTC.UnityPlugin.VRModuleManagement
 
     public sealed class WaveVRModule : VRModule.ModuleBase
     {
-        public override int moduleIndex { get { return (int)VRModuleActiveEnum.WaveVR; } }
+        public override int moduleOrder { get { return (int)DefaultModuleOrder.WaveVR; } }
+
+        public override int moduleIndex { get { return (int)VRModuleSelectEnum.WaveVR; } }
 
 #if VIU_WAVEVR && UNITY_ANDROID
         private class CameraCreator : VRCameraHook.CameraCreator
@@ -126,7 +129,7 @@ namespace HTC.UnityPlugin.VRModuleManagement
                             case WVR_DeviceType.WVR_DeviceType_Controller_Left:
 #if VIU_WAVEVR_3_0_0_OR_NEWER
                                 loader.WhichHand = s_moduleInstance.m_deviceHands[LEFT_INDEX];
-#else
+#elif VIU_WAVEVR_2_1_0_OR_NEWER
                                 if (Interop.WVR_GetWaveRuntimeVersion() >= 3 && WaveVR_Controller.IsLeftHanded)
                                 {
                                     loader.WhichHand = WaveVR_ControllerLoader.ControllerHand.Controller_Right;
@@ -135,6 +138,8 @@ namespace HTC.UnityPlugin.VRModuleManagement
                                 {
                                     loader.WhichHand = WaveVR_ControllerLoader.ControllerHand.Controller_Left;
                                 }
+#else
+                                loader.WhichHand = WaveVR_ControllerLoader.ControllerHand.Controller_Left;
 #endif
                                 loaderGO.SetActive(true);
 
@@ -286,10 +291,10 @@ namespace HTC.UnityPlugin.VRModuleManagement
 
         public override bool ShouldActiveModule()
         {
-#if UNITY_EDITOR && !VIU_WAVEVR_2_1_0_OR_NEWER
-            return false;
-#elif VIU_WAVEVR_3_1_3_OR_NEWER && UNITY_EDITOR
+#if VIU_WAVEVR_3_1_3_OR_NEWER && UNITY_EDITOR
             return UnityEditor.EditorPrefs.GetBool("WaveVR/DirectPreview/Enable Direct Preview", false);
+#elif !VIU_WAVEVR_2_1_0_OR_NEWER && UNITY_EDITOR
+            return false;
 #else
             return VIUSettings.activateWaveVRModule;
 #endif
@@ -302,39 +307,62 @@ namespace HTC.UnityPlugin.VRModuleManagement
                 VRModule.Instance.gameObject.AddComponent<WaveVR_Init>();
             }
 
-#if !UNITY_EDITOR && VIU_WAVEVR_3_0_0_OR_NEWER
+#if !UNITY_EDITOR && VIU_WAVEVR_3_1_0_OR_NEWER
             if (Object.FindObjectOfType<WaveVR_ButtonList>() == null)
             {
                 VRModule.Instance.gameObject.AddComponent<WaveVR_ButtonList>();
+
+                var buttonList = VRModule.Instance.gameObject.GetComponent<WaveVR_ButtonList>();
+                if (buttonList != null)
+                {
+                    buttonList.HmdButtons = new List<WaveVR_ButtonList.EHmdButtons>()
+                    {
+                        WaveVR_ButtonList.EHmdButtons.Enter
+                    };
+                    buttonList.DominantButtons = new List<WaveVR_ButtonList.EControllerButtons>()
+                    {
+                        WaveVR_ButtonList.EControllerButtons.Grip,
+                        WaveVR_ButtonList.EControllerButtons.Menu,
+                        WaveVR_ButtonList.EControllerButtons.Touchpad,
+                        WaveVR_ButtonList.EControllerButtons.Trigger
+                    };
+                    buttonList.NonDominantButtons = new List<WaveVR_ButtonList.EControllerButtons>()
+                    {
+                        WaveVR_ButtonList.EControllerButtons.Grip,
+                        WaveVR_ButtonList.EControllerButtons.Menu,
+                        WaveVR_ButtonList.EControllerButtons.Touchpad,
+                        WaveVR_ButtonList.EControllerButtons.Trigger
+                    };
+                }
             }
-#endif
-
-#if VIU_WAVEVR_3_0_0_OR_NEWER
-            var digitalCapability = (uint)WVR_InputType.WVR_InputType_Button;
-            var analogCapability = (uint)(WVR_InputType.WVR_InputType_Button | WVR_InputType.WVR_InputType_Touch | WVR_InputType.WVR_InputType_Analog);
-            var inputRequests = new WVR_InputAttribute_t[]
+#elif !UNITY_EDITOR && VIU_WAVEVR_3_0_0_OR_NEWER
+            if (Object.FindObjectOfType<WaveVR_ButtonList>() == null)
             {
-                new WVR_InputAttribute_t() { id = WVR_InputId.WVR_InputId_Alias1_Menu, axis_type = WVR_AnalogType.WVR_AnalogType_None, capability = digitalCapability },
-                new WVR_InputAttribute_t() { id = WVR_InputId.WVR_InputId_Alias1_Grip, axis_type = WVR_AnalogType.WVR_AnalogType_None, capability = digitalCapability },
-                new WVR_InputAttribute_t() { id = WVR_InputId.WVR_InputId_Alias1_DPad_Left, axis_type = WVR_AnalogType.WVR_AnalogType_None, capability = digitalCapability },
-                new WVR_InputAttribute_t() { id = WVR_InputId.WVR_InputId_Alias1_DPad_Up, axis_type = WVR_AnalogType.WVR_AnalogType_None, capability = digitalCapability },
-                new WVR_InputAttribute_t() { id = WVR_InputId.WVR_InputId_Alias1_DPad_Right, axis_type = WVR_AnalogType.WVR_AnalogType_None, capability = digitalCapability },
-                new WVR_InputAttribute_t() { id = WVR_InputId.WVR_InputId_Alias1_DPad_Down, axis_type = WVR_AnalogType.WVR_AnalogType_None, capability = digitalCapability },
-                new WVR_InputAttribute_t() { id = WVR_InputId.WVR_InputId_Alias1_Volume_Up, axis_type = WVR_AnalogType.WVR_AnalogType_None, capability = digitalCapability },
-                new WVR_InputAttribute_t() { id = WVR_InputId.WVR_InputId_Alias1_Volume_Down, axis_type = WVR_AnalogType.WVR_AnalogType_None, capability = digitalCapability },
-                new WVR_InputAttribute_t() { id = WVR_InputId.WVR_InputId_Alias1_Enter, axis_type = WVR_AnalogType.WVR_AnalogType_None, capability = digitalCapability },
+                VRModule.Instance.gameObject.AddComponent<WaveVR_ButtonList>();
 
-                new WVR_InputAttribute_t() { id = WVR_InputId.WVR_InputId_Alias1_Touchpad, axis_type = WVR_AnalogType.WVR_AnalogType_2D, capability = analogCapability },
-                new WVR_InputAttribute_t() { id = WVR_InputId.WVR_InputId_Alias1_Thumbstick, axis_type = WVR_AnalogType.WVR_AnalogType_2D, capability = analogCapability },
-
-                new WVR_InputAttribute_t() { id = WVR_InputId.WVR_InputId_Alias1_Digital_Trigger, axis_type = WVR_AnalogType.WVR_AnalogType_1D, capability = analogCapability },
-                new WVR_InputAttribute_t() { id = WVR_InputId.WVR_InputId_Alias1_Trigger, axis_type = WVR_AnalogType.WVR_AnalogType_1D, capability = analogCapability },
-            };
-
-#if !UNITY_EDITOR
-            Interop.WVR_SetInputRequest(WVR_DeviceType.WVR_DeviceType_Controller_Right, inputRequests, (uint)inputRequests.Length);
-            Interop.WVR_SetInputRequest(WVR_DeviceType.WVR_DeviceType_Controller_Left, inputRequests, (uint)inputRequests.Length);
-#endif
+                var buttonList = VRModule.Instance.gameObject.GetComponent<WaveVR_ButtonList>();
+                if (buttonList != null)
+                {
+                    buttonList.HmdButtons = new List<WaveVR_ButtonList.EButtons>()
+                    {
+                        WaveVR_ButtonList.EButtons.HMDEnter
+                    };
+                    buttonList.DominantButtons = new List<WaveVR_ButtonList.EButtons>()
+                    {
+                        WaveVR_ButtonList.EButtons.Grip,
+                        WaveVR_ButtonList.EButtons.Menu,
+                        WaveVR_ButtonList.EButtons.Touchpad,
+                        WaveVR_ButtonList.EButtons.Trigger
+                    };
+                    buttonList.NonDominantButtons = new List<WaveVR_ButtonList.EButtons>()
+                    {
+                        WaveVR_ButtonList.EButtons.Grip,
+                        WaveVR_ButtonList.EButtons.Menu,
+                        WaveVR_ButtonList.EButtons.Touchpad,
+                        WaveVR_ButtonList.EButtons.Trigger
+                    };
+                }
+            }
 #endif
 
             EnsureDeviceStateLength(DEVICE_COUNT);
